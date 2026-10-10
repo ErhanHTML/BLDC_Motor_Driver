@@ -1,6 +1,8 @@
-# 72 V BLDC motor sürücüsü — donanım ön tasarımı
+# 72 V BLDC motor sürücüsü — donanım ve kontrol ön tasarımı
 
 İlk prototip: **Hall sensörlü, kapalı çevrim akım kontrollü six-step**. Sonraki prototip: aynı üç faz güç köprüsü ve akım ölçümüyle **FOC + SVPWM**.
+
+Bu sohbet ve yüklenen Gemini sohbetinin teknik sentezi kontrol dokümanlarına eklendi. [40 maddelik denetim](docs/07-conversation-audit.md) kavram/birim hatalarını ve doğrulanamayan iddiaları ayırır; [adım adım kontrol anlatımı](docs/06-control-methods.md) ve [sensör/geçiş planı](docs/08-sensing-and-transition.md) düzeltilmiş mühendislik temelini verir. Ham sohbet ve erişilemeyen görseller teknik kanıt olarak kopyalanmadı.
 
 Bu çalışma 10 Ekim 2026 tarihinde paylaşılan blok diyagramı ve motor sonuç tablosuna göre hazırlanmıştır. Depoda üretime hazır Altium şeması, PCB veya motor test verisi bulunmadığından inceleme mimari düzeydedir. Aşağıdaki adaylar satın alma onayı veya L7e tip onayı anlamına gelmez. Özellikle bataryanın tam dolu gerilimi, motor faz akımı ve termal sınırlar henüz doğrulanmamıştır.
 
@@ -14,6 +16,10 @@ Bu çalışma 10 Ekim 2026 tarihinde paylaşılan blok diyagramı ve motor sonu�
 | [Ön BOM](hardware/BOM.md) | Parça adayları, miktarlar, seçim koşulları, fiyat/tedarik durumu |
 | [L7e gereksinim ve test matrisi](docs/04-validation-and-L7e.md) | Araç düzeyi mevzuat kapsamı, doğrulama ve prototip geçişi |
 | [Kaynaklar](docs/05-sources.md) | Üretici dokümanları ve resmî mevzuat bağlantıları |
+| [Six-step, FOC ve SVPWM](docs/06-control-methods.md) | Fiziksel çalışma, dönüşümler, PI ve 72 V sayısal örnekler |
+| [Sohbet teknik denetimi](docs/07-conversation-audit.md) | Bu sohbet ve Gemini metnindeki hatalar, düzeltmeler ve kanıt sınırları |
+| [Hall, encoder ve prototip geçişi](docs/08-sensing-and-transition.md) | Açı tahmini, ölçüm zamanlaması, arayüzler ve güvenli mod geçişi |
+| [Kontrol hesaplarının doğrulanması](scripts/control_examples.py) | Dönüşüm, ayrık PI, SVPWM ve açı hatası hesaplarını tekrar üretir |
 | [Hesap örnekleri](scripts/preliminary_calculations.py) | Tekrarlanabilir boyutlandırma örnekleri; gerçek motor modeli değildir |
 
 ## Önerilen başlangıç mimarisi
@@ -37,3 +43,9 @@ Bu çalışma 10 Ekim 2026 tarihinde paylaşılan blok diyagramı ve motor sonu�
 5. Ortam sıcaklığı, soğutucu, muhafaza/IP hedefi, kablo ve konektör sınırları.
 
 Bu bilgiler olmadan kesin MOSFET adedi, DC-link kapasitesi, sigorta değeri veya nihai BOM dondurulmaz.
+
+## Kontrol hesaplarını tekrar üretme
+
+`python3 scripts/control_examples.py`
+
+Harici paket gerektirmez. dq/abc dönüşümü ve akım invariants, altı sektörde SVPWM vektör rekonstrüksiyonu, ayrık PI birimleri ve gerilim sınırlarını kontrol eder; dokümanlardaki 72 V örneklerini yazdırır. Gerçek motor dinamiği, switching transient veya araç test simülasyonu değildir.

@@ -32,6 +32,23 @@
 | S17 | [ISO1410](https://www.ti.com/product/ISO1410) | İzole RS485 opsiyonu; automotive niteliği burada doğrulanmadı |
 | S18 | [TI komütasyon yöntemleri](https://www.ti.com/document-viewer/lit/html/SSZTAP5/GUID-CC1F9308-8F55-4454-B07B-6C65016E6430) | Hall six-step ve sinüzoidal/FOC yöntemlerinin bağlamı |
 
+## Kontrol ve sohbet denetimi kaynakları
+
+10 Ekim 2026 tarihli ek inceleme. C01/C02/C03 PDF metinleri ve üretici açıklamaları kontrol edildi. Formüllerin sayısal sonuçları ve köprü durumları depodaki örnek script ile bağımsız hesaplandı; aşağıdaki kaynaklar gerçek motorun kalibrasyon/test raporu değildir.
+
+| Ref | Resmî kaynak | Kapsam / erişim sınırı |
+|---|---|---|
+| C01 | [TI SPRABQ2 — Sensored FOC of 3-Phase PMSM](https://www.ti.com/lit/an/sprabq2/sprabq2.pdf) | FOC kontrol akışı, Clarke/Park, rotor açı feedback'i; özellikle §4 ve kontrol blok diyagramları |
+| C02 | [Microchip AN1078 — Sensorless FOC of PMSM](https://ww1.microchip.com/downloads/en/AppNotes/01078A.pdf) | Dönüşümler ve SVM; özellikle basılı s.11–12, Şekil12–14. Bit sırası/eksen konvansiyonları projedekinden farklı olabilir |
+| C03 | [ST UM1052 — PMSM FOC SDK v4.3](https://www.st.com/resource/en/user_manual/um1052-stm32f-pmsm-singledual-foc-sdk-v43-stmicroelectronics.pdf) | §8.3.2–8.3.3 Hall angle extrapolation/kalibrasyon, §8.4 encoder. Eski SDK dokümanı kavramsal kanıttır; güncel API garantisi değildir |
+| C04 | [ST X-CUBE-MCSDK](https://www.st.com/en/embedded-software/x-cube-mcsdk.html) / [TI Hall-sensored FOC guide](https://software-dl.ti.com/msp430/esd/MSPM0-SDK/2_03_00_07/docs/english/middleware/motor_control_pmsm_sensored_foc/doc_guide/doc_guide-srcs/Sensored_FOC_Motor_Control_Library.html) | Hall/encoder/sensorless seçenekleri; TI guide'da current sensing ve ADC yapılandırması |
+| C05 | [ams OSRAM AS5047P datasheet](https://look.ams-osram.com/m/d05ee39221f9857/original/AS5047P-DS000324.pdf) | Üretici arama dizinindeki SPI parity/error açıklaması erişilebildi; PDF tam açılışı başarısız. Satın alma/firmware öncesi tam güncel datasheet ve ordering code kontrol edilmeli; tüm timing/qualification şartları burada doğrulanmadı |
+| C06 | [MathWorks PMSM HDL modeli](https://www.mathworks.com/help/mcb/ref/pmsmhdl.html) / [PMSM torque estimator](https://www.mathworks.com/help/simscape-electrical/ref/pmsmtorqueestimator.html) | Sinüzoidal PMSM dq gerilim ve tork modelinin resmî yazılım dokümantasyonu; temel modelin gerçek motora uygulanabilirliği ayrı doğrulanır |
+| C07 | [TI komütasyon karşılaştırması](https://www.ti.com/document-viewer/lit/html/SSZTAP5/GUID-CC1F9308-8F55-4454-B07B-6C65016E6430) / [TI trapezoidal control açıklaması](https://www.ti.com/video/6011229676001) | Hall/sensorless six-step ve akım kontrolü bağlamı; belirli 72 V parça seçimi için kullanılmadı |
+| C08 | [MathWorks Space Vector Modulation](https://www.mathworks.com/discovery/space-vector-modulation.html) / [PWM Reference Generator](https://www.mathworks.com/help/mcb/ref/pwmreferencegenerator.html) | SVM/SPWM ve modülasyon seçenekleri; lineer gerilim avantajı sistem verimi garantisi değildir |
+
+Sohbetten aktarılan AS5047P yalnız araştırma adayıdır. Gemini'de adı geçen MT6835 için resmî datasheet/qualification bu incelemede okunmadı. Motor ve encoder birlikte seçilmeden yeni parça kesin BOM'a eklenmedi.
+
 ## Resmî mevzuat kaynakları
 
 | Ref | Kaynak | Bu çalışmanın doğruladığı kapsam |
