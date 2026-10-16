@@ -1,51 +1,29 @@
-# 72 V BLDC motor sürücüsü — donanım ve kontrol ön tasarımı
+# BLDC Motor Driver
 
-İlk prototip: **Hall sensörlü, kapalı çevrim akım kontrollü six-step**. Sonraki prototip: aynı üç faz güç köprüsü ve akım ölçümüyle **FOC + SVPWM**.
+Üç fazlı BLDC/PMSM motorlar için **Hall sensörlü Six-Step ve FOC/SVPWM uygulamalarını aynı donanım üzerinde desteklemeyi hedefleyen** motor sürücü donanım ön tasarımı.
 
-Bu sohbet ve yüklenen Gemini sohbetinin teknik sentezi kontrol dokümanlarına eklendi. [40 maddelik denetim](docs/07-conversation-audit.md) kavram/birim hatalarını ve doğrulanamayan iddiaları ayırır; [adım adım kontrol anlatımı](docs/06-control-methods.md) ve [sensör/geçiş planı](docs/08-sensing-and-transition.md) düzeltilmiş mühendislik temelini verir. Ham sohbet ve erişilemeyen görseller teknik kanıt olarak kopyalanmadı.
+Bu depo tamamlanmış veya doğrulanmış ürün sunmaz; sistem mimarisini, tasarım önerilerini, kritik arayüzleri ve doğrulama sırasında dikkat edilecek konuları açıklar. Nihai bileşen, gerilim/akım/termal sınır ve PCB kararları ölçüm ve incelemelerden sonra kesinleştirilmelidir.
 
-Bu çalışma 10 Ekim 2026 tarihinde paylaşılan blok diyagramı ve motor sonuç tablosuna göre hazırlanmıştır. Depoda üretime hazır Altium şeması, PCB veya motor test verisi bulunmadığından inceleme mimari düzeydedir. Aşağıdaki adaylar satın alma onayı veya L7e tip onayı anlamına gelmez. Özellikle bataryanın tam dolu gerilimi, motor faz akımı ve termal sınırlar henüz doğrulanmamıştır.
+## Sistem kapsamı
 
-## Dosyalar
+- Üç faz için üç bağımsız yarım köprü; her fazda high-side ve low-side güç anahtarı.
+- Her yarım köprü için **bir bağımsız çift çıkışlı gate-driver**; toplam üç sürücü.
+- Kontrol biriminde tamamlayıcı PWM, donanımsal dead-time ve fault girişleri.
+- Senkron faz akımı geri beslemesi, DC-link ölçümü, sıcaklık ve donanımsal aşırı akım koruması.
+- Üç dijital Hall girişi; gelecekte daha hassas rotor konumu için ek sensör arayüzüne yer ayrılması.
+- Yardımcı beslemeler, haberleşme, kontrol girişleri ve korumalı durum geçişleri.
 
-| Dosya | İçerik |
+## Belgeler
+
+| Belge | Amaç |
 |---|---|
-| [Ön inceleme](docs/01-review.md) | Motor verileri, diyagramdaki hatalar/eksikler, açık girdiler |
-| [Donanım tasarım kılavuzu](docs/02-hardware-guide.md) | Güç köprüsü, sürücüler, besleme, ölçüm, koruma, PCB ve soğutma |
-| [Blok diyagramları](docs/03-diagrams.md) | Güç yolu, kontrol, donanımsal kapatma ve izolasyon alanları |
-| [Ön BOM](hardware/BOM.md) | Parça adayları, miktarlar, seçim koşulları, fiyat/tedarik durumu |
-| [L7e gereksinim ve test matrisi](docs/04-validation-and-L7e.md) | Araç düzeyi mevzuat kapsamı, doğrulama ve prototip geçişi |
-| [Kaynaklar](docs/05-sources.md) | Üretici dokümanları ve resmî mevzuat bağlantıları |
-| [Six-step, FOC ve SVPWM](docs/06-control-methods.md) | Fiziksel çalışma, dönüşümler, PI ve 72 V sayısal örnekler |
-| [Sohbet teknik denetimi](docs/07-conversation-audit.md) | Bu sohbet ve Gemini metnindeki hatalar, düzeltmeler ve kanıt sınırları |
-| [Hall, encoder ve prototip geçişi](docs/08-sensing-and-transition.md) | Açı tahmini, ölçüm zamanlaması, arayüzler ve güvenli mod geçişi |
-| [Kontrol hesaplarının doğrulanması](scripts/control_examples.py) | Dönüşüm, ayrık PI, SVPWM ve açı hatası hesaplarını tekrar üretir |
-| [Hesap örnekleri](scripts/preliminary_calculations.py) | Tekrarlanabilir boyutlandırma örnekleri; gerçek motor modeli değildir |
+| [Sistem mimarisi](docs/01-review.md) | Donanım blokları ve açıklamalar |
+| [Donanım tasarım rehberi](docs/02-hardware-guide.md) | Her alt sistemde dikkat edilecek konular |
+| [Blok diyagramları](docs/03-diagrams.md) | Güç, sinyal ve fault akışları |
+| [Doğrulama kontrol listesi](docs/04-validation-and-L7e.md) | Şema, yerleşim ve test öncesi gözden geçirme |
+| [Kaynak değerlendirme yöntemi](docs/05-sources.md) | Datasheet ve uygulama notu inceleme ölçütleri |
+| [Algoritma uyumluluğu](docs/06-control-methods.md) | Ortak donanımın Six-Step ve FOC gereksinimleri |
+| [Algılama ve geçiş](docs/08-sensing-and-transition.md) | Hall, akım ve konum arayüzleri |
+| [Ön BOM](hardware/BOM.md) | Aday kategorileri ve seçim gerekçeleri |
 
-## Önerilen başlangıç mimarisi
-
-- STM32G474RE sınıfı MCU; 6 PWM, senkron ADC, donanımsal timer break, Hall ve encoder bağlantı alanı.
-- Üç low-side Kelvin shunt + üç çift yönlü akım yükselteci; ayrı DC giriş akımı ölçümü.
-- 150 V MOSFET sınıfı aday güç köprüsü. MOSFET paralel sayısı sıcaklık ve faz akımıyla belirlenecek.
-- Gerilim marjı için üç UCC21520-Q1 çift kanal izole gate driver adayı; high-side başına yüzer besleme. İzole gate driver tek başına araç izolasyonunu sağlamaz.
-- Alternatif: üç UCC27301A-Q1 bootstrap driver. HB pin gerilimi bara + gate beslemesidir; 120 V etiketi 120 V bara izni değildir. Paket/enable farkına dikkat.
-- Dahili kontrol alanı BAT− referanslı; araç LV/şasi alanına haberleşme ve kullanıcı I/O üzerinden galvanik köprü kurulmayacak.
-- Precharge, kontaktör/BMS izinleri, DC-link deşarjı, bağımsız OCP/fault latch ve sıcaklık derating.
-
-İlk prototipte alan zayıflatma ve rejenerasyon devre dışı tutulur. Bu, dönen motorun gövde diyotları üzerinden DC-link'i yükseltemeyeceği anlamına gelmez; bara aşırı gerilim senaryosu yine ele alınmalıdır.
-
-## Önce kapatılacak kararlar
-
-1. Batarya kimyası, seri hücre sayısı, maksimum şarj gerilimi, BMS akım/regen sınırları.
-2. Motor üretici/modeli, faz R/L, kutup çifti sayısı, geri EMK biçimi ve Hall sırası/açısı.
-3. 50 A değerinin batarya akımı mı, faz RMS akımı mı olduğu; kalkış akımı ve izin verilen süresi.
-4. Araç sınıfı (L7e alt kategorisi), hedef ülke/tip onayı yolu ve uygulanacak mevzuat revizyonları.
-5. Ortam sıcaklığı, soğutucu, muhafaza/IP hedefi, kablo ve konektör sınırları.
-
-Bu bilgiler olmadan kesin MOSFET adedi, DC-link kapasitesi, sigorta değeri veya nihai BOM dondurulmaz.
-
-## Kontrol hesaplarını tekrar üretme
-
-`python3 scripts/control_examples.py`
-
-Harici paket gerektirmez. dq/abc dönüşümü ve akım invariants, altı sektörde SVPWM vektör rekonstrüksiyonu, ayrık PI birimleri ve gerilim sınırlarını kontrol eder; dokümanlardaki 72 V örneklerini yazdırır. Gerçek motor dinamiği, switching transient veya araç test simülasyonu değildir.
+**Durum:** Mimari öneri; şema, PCB routing, motor karakterizasyonu, koruma koordinasyonu ve termal doğrulama tamamlanmış değildir.
