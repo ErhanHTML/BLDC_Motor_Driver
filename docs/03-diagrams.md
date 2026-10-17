@@ -1,40 +1,37 @@
 # Sistem blok diyagramları
 
-Oklar işlevsel akışı gösterir; bunlar PCB routing'i ya da tamamlanmış elektrik şeması değildir.
-
-## Güç akışı
+Bu revizyonun geçerli ayrıntıları: [Entegre kart tasarım notu](09-integrated-board-revision.md). Diyagramlar işlevsel akıştır; elektrik şeması ve routing değildir.
 
 ```mermaid
 flowchart LR
-  IN[DC giriş] --> PROT[Giriş koruma / ayırma / ön şarj]
-  PROT --> LINK[DC-link ve gerilim algılama]
-  LINK --> A[Yarım köprü U]
-  LINK --> B[Yarım köprü V]
-  LINK --> C[Yarım köprü W]
-  A --> M[Üç faz motor]
+  IN[DC giriş] --> PROT[Giriş koruma ve ayırma]
+  PROT --> LINK[DC-link]
+  LINK --> A[Half-Bridge U]
+  LINK --> B[Half-Bridge V]
+  LINK --> C[Half-Bridge W]
+  A --> M[Motor]
   B --> M
   C --> M
-  LINK --> AUX[Yardımcı beslemeler]
+  IN --> AUX[Kart içi buck 12 V]
+  AUX --> LV[5 V / 3,3 V]
 ```
-
-## Kontrol, ölçüm ve fault
 
 ```mermaid
 flowchart TD
-  MCU[Kontrol MCU: PWM / ADC / zamanlayıcı] --> GA[Gate Driver U]
+  MCU[STM32 / PWM / ADC] --> GA[Gate Driver U]
   MCU --> GB[Gate Driver V]
   MCU --> GC[Gate Driver W]
   GA --> A[Half-Bridge U]
   GB --> B[Half-Bridge V]
   GC --> C[Half-Bridge W]
-  H[Hall / opsiyonel encoder] --> MCU
-  IA[Faz akımı / DC-link ölçümü] --> MCU
-  TEMP[Sıcaklık / bus gerilimi] --> MCU
-  CMP[Bağımsız fault algılama] --> LATCH[Donanımsal kapatma / latch]
+  H[Hall connector] --> MCU
+  IA[Kart içi faz akımı / DC-link ölçüm] --> MCU
+  T[Sıcaklık / bus gerilimi] --> MCU
+  CMP[Bağımsız fault algılama] --> LATCH[Donanımsal shutdown]
   LATCH --> GA
   LATCH --> GB
   LATCH --> GC
   LATCH --> MCU
 ```
 
-Yüksek taraf sürücü beslemesi faz düğümüne referanslı olabilir; tüm sürücüleri tek ortak toprak sembolüne indirgemeyin. Güvenli kapatma mantığı firmware'in zamanında tepki vermesine bağımlı olmamalıdır.
+Harici AUX, CAN, RS485 veya current-sense konnektörü bu kart revizyonunda yoktur. High-side besleme ve referansları gerçek gate-driver seçiminde ayrıca doğrulanmalıdır.

@@ -1,29 +1,27 @@
 # BLDC Motor Driver
 
-Üç fazlı BLDC/PMSM motorlar için **Hall sensörlü Six-Step ve FOC/SVPWM uygulamalarını aynı donanım üzerinde desteklemeyi hedefleyen** motor sürücü donanım ön tasarımı.
+Üç fazlı BLDC/PMSM sürücü için Hall sensörlü Six-Step ve FOC/SVPWM'ye uygun **entegre kart donanım ön tasarımı**. Bu depo üretime hazır elektrik şeması/PCB sunmaz; gereksinim ve tasarım önerilerini kayıt altına alır.
 
-Bu depo tamamlanmış veya doğrulanmış ürün sunmaz; sistem mimarisini, tasarım önerilerini, kritik arayüzleri ve doğrulama sırasında dikkat edilecek konuları açıklar. Nihai bileşen, gerilim/akım/termal sınır ve PCB kararları ölçüm ve incelemelerden sonra kesinleştirilmelidir.
+## Güncel kart kapsamı
 
-## Sistem kapsamı
-
-- Üç faz için üç bağımsız yarım köprü; her fazda high-side ve low-side güç anahtarı.
-- Her yarım köprü için **bir bağımsız çift çıkışlı gate-driver**; toplam üç sürücü.
-- Kontrol biriminde tamamlayıcı PWM, donanımsal dead-time ve fault girişleri.
-- Senkron faz akımı geri beslemesi, DC-link ölçümü, sıcaklık ve donanımsal aşırı akım koruması.
-- Üç dijital Hall girişi; gelecekte daha hassas rotor konumu için ek sensör arayüzüne yer ayrılması.
-- Yardımcı beslemeler, haberleşme, kontrol girişleri ve korumalı durum geçişleri.
+- Üç half-bridge, altı MOSFET konumu, faz başına **bir bağımsız çift çıkışlı gate-driver**.
+- Harici AUX supply yok: DC girişten **kart içinde buck ile 12 V**, ardından ihtiyaç duyulan 5 V/3,3 V rayları.
+- **CAN, RS485 ve harici akım ölçüm konnektörleri bulunmayacak.** FOC için kart içi faz akımı geri beslemesi korunacak.
+- Hall sensör arayüzü, STM32 motor kontrol PWM/ADC, bus ve sıcaklık ölçümü, bağımsız fault kapatma.
+- DRV ailesi kullanılmıyor. Bütün aday MPN ve değerler doğrulamaya tabidir.
 
 ## Belgeler
 
-| Belge | Amaç |
+| Belge | İçerik |
 |---|---|
-| [Sistem mimarisi](docs/01-review.md) | Donanım blokları ve açıklamalar |
-| [Donanım tasarım rehberi](docs/02-hardware-guide.md) | Her alt sistemde dikkat edilecek konular |
-| [Blok diyagramları](docs/03-diagrams.md) | Güç, sinyal ve fault akışları |
-| [Doğrulama kontrol listesi](docs/04-validation-and-L7e.md) | Şema, yerleşim ve test öncesi gözden geçirme |
-| [Kaynak değerlendirme yöntemi](docs/05-sources.md) | Datasheet ve uygulama notu inceleme ölçütleri |
-| [Algoritma uyumluluğu](docs/06-control-methods.md) | Ortak donanımın Six-Step ve FOC gereksinimleri |
-| [Algılama ve geçiş](docs/08-sensing-and-transition.md) | Hall, akım ve konum arayüzleri |
-| [Ön BOM](hardware/BOM.md) | Aday kategorileri ve seçim gerekçeleri |
+| [Entegre kart yerleşim revizyonu](docs/09-integrated-board-revision.md) | Referans görsele göre yerleşim, kart içi buck, çıkarılan arayüzler ve açık kararlar |
+| [Sistem kapsamı](docs/01-review.md) | Mimari açıklama |
+| [Donanım kılavuzu](docs/02-hardware-guide.md) | Güç katı, ölçüm, Hall, gate drive ve güvenlik |
+| [Blok diyagramları](docs/03-diagrams.md) | Güncel bloklar ve fault akışı |
+| [Doğrulama listesi](docs/04-validation-and-L7e.md) | İnceleme kapıları |
+| [Kaynak değerlendirmesi](docs/05-sources.md) | Datasheet doğrulama |
+| [Algoritma uyumluluğu](docs/06-control-methods.md) | Six-Step / FOC ortak arayüz |
+| [Algılama](docs/08-sensing-and-transition.md) | Hall ve dahili faz akım algılama |
+| [Ön BOM](hardware/BOM.md) | Güncel komponent grupları ve çıkarılan harici konektörler |
 
-**Durum:** Mimari öneri; şema, PCB routing, motor karakterizasyonu, koruma koordinasyonu ve termal doğrulama tamamlanmış değildir.
+**Durum:** Konsept; üretim için şema, hesaplar, footprint, routing, ERC/DRC ve uygun test/doğrulama gereklidir.

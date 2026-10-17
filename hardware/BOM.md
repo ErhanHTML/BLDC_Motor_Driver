@@ -1,21 +1,26 @@
-# Ön BOM — donanım öneri listesi
+# Ön BOM — entegre kart revizyonu
 
-Bu belge kesin sipariş listesi değildir. **DRV serisi kullanılmayacaktır.** Parça numaraları, ölçülmüş gereksinimler ve güncel datasheet ile doğrulandıktan sonra belirlenecektir.
+Aday gereksinim listesi; kesin sipariş BOM'u değildir. Görselin çizdiği her pasif elemanın elektriksel değeri bilinmez. **DRV serisi kullanılmaz.** Detay: [Entegre kart notu](../docs/09-integrated-board-revision.md).
 
-| Alt sistem | Öneri / miktar | Seçim kontrolü |
+| Blok | Yerleşim adayı | İnceleme ölçütü |
 |---|---|---|
-| Güç köprüsü | Üç half-bridge; toplam altı anahtar konumu | Elektriksel/termal zarf, paket, SOA, parazitikler |
-| Gate-driver | **Üç ayrı çift kanallı entegre; her faza bir adet** | High-side yöntemi, UVLO, CMTI, PWM arayüzü, güvenli kapatma |
-| Gate ağı | Her anahtar için sürüş ve deşarj bileşenleri | Gate charge, açma-kapama ve Miller davranışı |
-| DC-link | Bulk + yerel film/seramik bank | RMS ripple, ESR/ESL, gerilim marjı, yerleşim |
-| MCU | Motor kontrol zamanlayıcılı STM32 adayı | Tamamlayıcı PWM, break, ADC tetikleme, Hall/encoder |
-| Faz akım ölçümü | Üç kanal için yer ayrılması önerilir | Örnekleme, bant genişliği, ofset, koruma |
-| DC-link / bus ölçümü | Akım ve gerilim geri beslemesi | İzleme/koruma için aralık ve doğruluk |
-| Donanım fault | Comparator/latch/shutdown bloğu | MCU'dan bağımsız kapatma |
-| Sıcaklık | Güç katı ve motor sensör girişleri | Aralık, kalibrasyon, fail-safe |
-| Hall | Üç dijital giriş + koruma | Kablo paraziti, ESD, lojik seviye |
-| Haberleşme | Uygun transceiver ve konnektör | Gürültü/izolasyon ve araç arayüzü |
-| AUX güç | Kontrol ve gate besleme blokları | Başlatma, UVLO, izolasyon, güç bütçesi |
-| Mekanik/PCB | Konnektör, montaj ve soğutma alanları | Creepage/clearance, termal yol, servis |
+| DC giriş / koruma | konnektör, sigorta/ayırma, precharge ve deşarj değerlendirmesi | giriş transient, kablo, güvenlik |
+| EMI | filtre ve gerekli sönüm; opsiyonel elemanlar TBD | rezonans, şasi/IMD uyumu, EMC |
+| DC-link | bulk bank + köprüye yakın yerel film/seramik | gerilim, ESR/ESL, RMS ripple, ömür |
+| Güç katı | üç half-bridge, altı MOSFET konumu | RDS(on) sıcaklık, SOA, Qg, mekanik/termal |
+| Gate-driver | **faz başına 1 çift çıkışlı; toplam 3** | yüzer high-side, UVLO, CMTI, kapatma |
+| Gate pasifleri | sürücü başına bypass / gate ağı / varsa bootstrap | üretici önerisi ve transient |
+| Kart içi buck | DC girişten 12 V kontrolcü, indüktör, diyot (topolojiye göre), CIN/COUT, FB/EN, gerekli kompanzasyon | maksimum giriş + transient, 12 V yük bütçesi, termal |
+| Düşük gerilim | 12→5 V ve 5→3,3 V regülasyon, bypass/filtre | MCU/Hall/sensör güç bütçesi |
+| MCU | STM32 motor-control adayı | altı PWM, ADC trigger, break, Hall, debug |
+| Faz akım algılama | kart üstünde üç kanal rezervi / AFE | FOC zamanlama, ofset, Kelvin, aşırı akım |
+| DC-link algılama | kart üstü bus akım/gerilim | aralık, ADC, koruma |
+| Fault | karşılaştırıcı/latch, gate shutdown, watchdog | MCU'dan bağımsız fail-safe |
+| Hall | tek Hall konnektörü, giriş koruma/filtre | seviye, ESD, gecikme |
+| Sıcaklık | kart üstü/uygun motor sensör arayüzü | kalibrasyon, fail-safe |
+| Servis | SWD/programlama ve seçilecek temel kontrol arayüzleri | pin bütçesi / ESD |
+| Mekanik | 160 × 120 mm referans kart alanı | konnektör, soğutma ve clearance |
 
-Parça sayısı ve kesin MPN şema/ERC, termal çalışma, fault mantığı ve PCB gözden geçirmesinden sonra yayımlanır.
+**Bu revizyonda BOM'dan çıkarılacaklar:** harici AUX besleme konnektörü, CAN transceiver/konnektörü, RS485 transceiver/konnektörü, harici akım ölçüm konnektörü. Akım ölçüm devreleri çıkarılmaz.
+
+100 nF = 0,1 µF gibi tipik bypass değerleri, yalnız uygulama şeması ve gerilim/derating kontrolünden sonra net MPN/0805 alanlarına atanmalıdır.
