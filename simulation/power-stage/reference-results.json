@@ -1,0 +1,28 @@
+{
+  "model": "Idealized three-phase numerical inverter, NOT SPICE device-level",
+  "input": {
+    "vsource_V": 72,
+    "Rsource_ohm": 0.02,
+    "Cbus_F": 0.00136,
+    "ESR_ohm": 0.009,
+    "fpwm_Hz": 15000,
+    "felectrical_Hz": 60,
+    "modulation_index": 0.86,
+    "deadtime_s": 0.0000012,
+    "phase_L_H": 0.00045,
+    "phase_R_ohm": 0.15,
+    "emf_peak_V": 22,
+    "sim_length_s": 0.06,
+    "dt_s": 0.000001
+  },
+  "final_cycle": {
+    "bus_mean_V": 71.692,
+    "bus_min_V": 71.522,
+    "bus_max_V": 71.887,
+    "bus_pp_V": 0.366,
+    "phaseA_rms_A": 23.826,
+    "source_avg_A": 15.388,
+    "input_power_W": 1108
+  },
+  "caveat": "Fictional plant; no 3.5kW/5kW, MOSFET, driver, thermal, EMI, fault, or real motor validation"
+}
