@@ -1,0 +1,69 @@
+* BLDC Power V0.1 — three-phase 6-switch SPWM inverter, simulation only.
+* 72 V DC, 15 kHz triangle carrier, 60 Hz electrical frequency.
+* Simplified ideal-voltage-controlled SW elements and generic antiparallel diodes.
+* DOES NOT model real IPF036N15NM6, UCC27714 or any manufacturer SPICE model.
+* NOT a production-ready gate driver, thermal, EMI or protection design.
+
+V_BAT BAT 0 DC 72
+R_BAT BAT BUS 0.020
+R_ESR BUS CAP_P 0.009
+C_LINK CAP_P 0 1360u IC=72
+
+* Generic switch with 5 milliohm on-resistance (illustrative only).
+.model SW_POWER SW(Ron=0.005 Roff=1e9 Vt=6 Vh=0.2)
+.model D_GENERIC D(Is=1e-12 Rs=0.010 N=1.5 Cjo=1n Tt=100n)
+
+* Phase U: upper switch BUS->U, lower switch U->GND.
+S_HU BUS U GH_U U SW_POWER
+S_LU U 0 GL_U 0 SW_POWER
+D_HU U BUS D_GENERIC
+D_LU 0 U D_GENERIC
+
+* Phase V.
+S_HV BUS V GH_V V SW_POWER
+S_LV V 0 GL_V 0 SW_POWER
+D_HV V BUS D_GENERIC
+D_LV 0 V D_GENERIC
+
+* Phase W.
+S_HW BUS W GH_W W SW_POWER
+S_LW W 0 GL_W 0 SW_POWER
+D_HW W BUS D_GENERIC
+D_LW 0 W D_GENERIC
+
+* Centered triangle carrier: 2/pi * asin(sin(2*pi*15000*time)).
+* Reference = 0.86*sin(2*pi*60*time + phase_angle).
+* 0.036 comparator threshold offset provides an approximate 1.2 us
+* blanking between high-side and low-side commands; this is an
+* abstract ideal-timing model, NOT a verified gate driver dead time.
+* High-side CONTROL is floated with respect to the phase node.
+B_GHU GH_U U V=12*u(0.86*sin(2*pi*60*time)-(2/pi)*asin(sin(2*pi*15000*time))-0.036)
+B_GLU GL_U 0 V=12*u((2/pi)*asin(sin(2*pi*15000*time))-0.86*sin(2*pi*60*time)-0.036)
+B_GHV GH_V V V=12*u(0.86*sin(2*pi*60*time-2*pi/3)-(2/pi)*asin(sin(2*pi*15000*time))-0.036)
+B_GLV GL_V 0 V=12*u((2/pi)*asin(sin(2*pi*15000*time))-0.86*sin(2*pi*60*time-2*pi/3)-0.036)
+B_GHW GH_W W V=12*u(0.86*sin(2*pi*60*time+2*pi/3)-(2/pi)*asin(sin(2*pi*15000*time))-0.036)
+B_GLW GL_W 0 V=12*u((2/pi)*asin(sin(2*pi*15000*time))-0.86*sin(2*pi*60*time+2*pi/3)-0.036)
+
+* Fictional three-phase floating-star PMSM equivalent motor plant.
+* Each phase: L=450uH, R=0.15ohm, sinusoidal back EMF 22V peak.
+* The parameter set is illustrative and does NOT represent a known motor.
+L_U U U_L 450u
+R_U U_L U_E 0.15
+B_EMF_U U_E N V=22*sin(2*pi*60*time)
+L_V V V_L 450u
+R_V V_L V_E 0.15
+B_EMF_V V_E N V=22*sin(2*pi*60*time-2*pi/3)
+L_W W W_L 450u
+R_W W_L W_E 0.15
+B_EMF_W W_E N V=22*sin(2*pi*60*time+2*pi/3)
+R_NEUTRAL N 0 100Meg
+
+* Source current is -I(V_BAT) when the source supplies energy.
+.tran 1u 67m 0 1u
+.save V(BUS) V(U) V(V) V(W) V(GH_U,U) V(GL_U) I(L_U) I(L_V) I(L_W) I(V_BAT)
+.meas tran VBUS_MEAN AVG V(BUS) FROM=50m TO=66.666m
+.meas tran VBUS_MIN MIN V(BUS) FROM=50m TO=66.666m
+.meas tran VBUS_MAX MAX V(BUS) FROM=50m TO=66.666m
+.meas tran I_PHASE_U_RMS RMS I(L_U) FROM=50m TO=66.666m
+.meas tran I_BAT_MEAN AVG I(V_BAT) FROM=50m TO=66.666m
+.end
