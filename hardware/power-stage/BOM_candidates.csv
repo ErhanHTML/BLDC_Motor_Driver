@@ -1,0 +1,10 @@
+Function,Ref,Count,Candidate,State,Review requirement
+N-MOSFET,QH_U|QL_U|QH_V|QL_V|QH_W|QL_W,6,Infineon IPF036N15NM6,Candidate,150V; thermal/switching/footprint not checked
+Gate driver,GD_U|GD_V|GD_W,3,TI UCC27714,Candidate,HI/LI and floating high-side; bootstrap/duty/fault review
+HV to 12V buck,U_BK1,1,TI LM5164,NOT APPROVED,100V max VIN: 80.6V full-charge leaves transient-margin concern
+12V to 5V regulator,U_BK2,1,TI TPS62175,Candidate,0.5A output and heating must be checked
+5V to 3V3 LDO,U_LDO1,1,TI TLV755P 3V3,Candidate,0.5A thermal load check
+Phase current AFE,U_SENSE_U|U_SENSE_V|U_SENSE_W,3,TI INA241A-Q1,Candidate,-5V to 110V common-mode; phase topology unspecified
+Bulk and HF DC-link capacitors,C_LINK,TBD,No part selected,MODEL ONLY,1360uF/9mOhm are fictional virtual model assumptions
+Gate and bootstrap passives,Various,TBD,No part selected,OPEN,Requires gate drive and switching analysis
+Sense shunts snubbers EMI protection,Various,TBD,No part selected,OPEN,Requires complete electrothermal/EMC/fault design
