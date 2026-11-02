@@ -1,0 +1,21 @@
+* BLDC Power V0.1 — DC-link load step, simulation-only model
+* 72 V source, 20 milliohm source impedance, 1360 uF bus capacitor, 9 mOhm ESR.
+* Current steps are illustrative, not the real EV duty cycle.
+* Battery source -> source resistance -> BUS -> series ESR -> capacitor -> ground.
+
+V_BAT BAT 0 DC 72
+R_BAT BAT BUS 0.020
+R_ESR BUS CAP_P 0.009
+C_LINK CAP_P 0 1360u IC=72
+
+* Positive load current discharges the DC bus.
+* Negative load current (35-43ms) emulates energy returned to the bus.
+I_LOAD BUS 0 PWL(0 8 4.99m 8 5m 25 25m 25 25.01m 8 35m 8 35.01m -5 43m -5 43.01m 8 50m 8)
+
+.tran 2u 50m 0 2u
+.save V(BUS) V(CAP_P) I(V_BAT) I(I_LOAD)
+.meas tran VBUS_AVG AVG V(BUS) FROM=10m TO=25m
+.meas tran VBUS_MIN MIN V(BUS) FROM=5m TO=35m
+.meas tran VBUS_MAX MAX V(BUS) FROM=35m TO=43m
+.meas tran VBUS_REGEN_PEAK MAX V(BUS) FROM=35m TO=43m
+.end
