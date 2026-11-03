@@ -1,0 +1,33 @@
+* BLDC Power V0.1 — BEHAVIORAL (averaged) auxiliary rails simulation.
+* THIS IS NOT an LM5164 or other physical switching buck design.
+* Estimates transient response to low-voltage load steps ONLY.
+* HV input -> idealized 12V control -> idealized 5V control -> 3.3V control.
+* No real inductors, switches, compensation, or IC pin connections are modeled.
+
+V_BAT BAT 0 DC 72
+R_BAT BAT BUS 0.020
+C_IN BUS 0 22u
+
+* Abstract 12V regulator: line target at 12V while bus is adequate.
+* The 0.15ohm output resistance and 470uF capacitance are arbitrary.
+B_12_REG TAR12 0 V=12*u(V(BUS)-18)
+R_12_OUT TAR12 V12 0.15
+C_12_OUT V12 0 470u
+I_12_LOAD V12 0 PWL(0 0.10 5m 0.10 5.01m 0.35 20m 0.35 20.01m 0.15 50m 0.15)
+
+B_5_REG TAR5 0 V=5*u(V(V12)-6.5)
+R_5_OUT TAR5 V5 0.12
+C_5_OUT V5 0 220u
+I_5_LOAD V5 0 PWL(0 0.05 10m 0.05 10.01m 0.20 30m 0.20 30.01m 0.05 50m 0.05)
+
+B_33_REG TAR33 0 V=3.3*u(V(V5)-3.8)
+R_33_OUT TAR33 V33 0.08
+C_33_OUT V33 0 100u
+I_33_LOAD V33 0 PWL(0 0.04 15m 0.04 15.01m 0.14 35m 0.14 35.01m 0.04 50m 0.04)
+
+.tran 2u 50m 0 2u
+.save V(BUS) V(V12) V(V5) V(V33) I(V_BAT)
+.meas tran V12_LOAD AVG V(V12) FROM=7m TO=19m
+.meas tran V5_LOAD AVG V(V5) FROM=12m TO=28m
+.meas tran V33_LOAD AVG V(V33) FROM=17m TO=33m
+.end
